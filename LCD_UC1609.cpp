@@ -41,7 +41,7 @@ void LCD_UC1609::uc1609_data (uint8_t d) {
 
 // Send a command to the display
 void LCD_UC1609::uc1609_command (uint8_t command, uint8_t value) {
-#ifdef USE_AVR_PORTS
+#ifdef __AVR__
   PORTB &= ~(1 << dc);
   uc1609_data(command | value);
   PORTB |= (1 << dc);
@@ -54,7 +54,7 @@ void LCD_UC1609::uc1609_command (uint8_t command, uint8_t value) {
 
 LCD_UC1609 :: LCD_UC1609(uint8_t _dc, uint8_t _rst, uint8_t _cs) : Adafruit_GFX(LCD_WIDTH, LCD_HEIGHT) {
   // check for define and set pin numbers
-#ifdef USE_AVR_PORTS
+#ifdef __AVR__
   dc = _dc % 8;
   rst = _rst % 8;
   cs = _cs % 8;
@@ -72,7 +72,7 @@ LCD_UC1609 :: LCD_UC1609(uint8_t _dc, uint8_t _rst, uint8_t _cs) : Adafruit_GFX(
 
 // https://www.arduino.cc/en/reference/SPI
 void LCD_UC1609::begin () {
-#ifdef USE_AVR_PORTS
+#ifdef __AVR__
   DDRB = 1 << dc | 1 << cs | 1 << rst ; //
 #else
   pinMode(dc, OUTPUT);
@@ -103,7 +103,7 @@ void LCD_UC1609::begin () {
 
 void LCD_UC1609::initDisplay() {
   // POWER ON SEQUENCE
-#ifdef USE_AVR_PORTS
+#ifdef __AVR__
   PORTB |= (1 << dc);
 #else
   digitalWrite(dc, HIGH);
@@ -128,7 +128,7 @@ void LCD_UC1609::initDisplay() {
 }
 
 void LCD_UC1609::select () {
-#ifdef USE_AVR_PORTS
+#ifdef __AVR__
   PORTB &= ~(1 << cs);
 #else
   digitalWrite(cs, LOW);
@@ -136,7 +136,7 @@ void LCD_UC1609::select () {
 }
 
 void LCD_UC1609::deselect () {
-#ifdef USE_AVR_PORTS
+#ifdef __AVR__
   PORTB |= (1 << cs);
 #else
   digitalWrite(cs, HIGH);
@@ -144,7 +144,7 @@ void LCD_UC1609::deselect () {
 }
 
 void LCD_UC1609::hardwareReset () {
-#ifdef USE_AVR_PORTS
+#ifdef __AVR__
   PORTB &= ~(1 << rst);
   delay(150);
   PORTB |= (1 << rst);
@@ -262,7 +262,7 @@ void LCD_UC1609::displayBuffer(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8
       if (x + tx < 0 || x + tx >= LCD_WIDTH) {
         continue;
       }
-      tc = (w * (ty >> 3)) + tx; // zkusit tedle GOOD!!!!!!!!!!!!!!!!
+      tc = (w * (ty >> 3)) + tx; // get offset to read from vertically addressed bitmap
       (void)SPI.transfer( data[tc++] ); //
     }
   }

@@ -67,7 +67,7 @@ class LCD_UC1609 : public Adafruit_GFX {
     LCD_UC1609(uint8_t _dc, uint8_t _rst, uint8_t _cs);
     ~LCD_UC1609() {};
 
-#ifndef USE_AVR_PORTS
+#ifndef __AVR__
 #warning USING DIGITALWRITE
 #endif
 
