@@ -14,7 +14,7 @@ All text above must be included in any redistribution.<br/>
 
 ### LIMITATIONS:
 - the backlight handling is left to user, for testing purposes it is enough to put 1k resistor from "VDD" pin to "A" pin and a wire from "GND" to "K" pin
-- tested with old [1.1.5](https://github.com/adafruit/Adafruit-GFX-Library/tree/v1.1.5), may work up to [1.2.2](https://github.com/adafruit/Adafruit-GFX-Library/tree/1.2.2), newer versions **are not tested**
+- tested with old [1.1.5](https://github.com/adafruit/Adafruit-GFX-Library/tree/v1.1.5), may work up to https://github.com/adafruit/Adafruit-GFX-Library/tree/1.2.2, newer versions **are not tested**
 - without any buffer the use is limited to display progmem bitmaps
 - both the buffers and progmem bitmaps displayed directly have offset in Y axis aligned by 8 pixels, e.g. 0-8 -> 0, 8-16 -> 8 to avoid bit shifting whole bitmap
 - the adafruitGFX screen canvas is set at compile time so it is always set to display dimensions, even if the advanced buffer is set smaller, but it does not limit the usage of anything except for text wrapping which is done at the screen edges presented by GfX, offscreen pixels are handled by both the GFX and `drawPixel()` in this library
