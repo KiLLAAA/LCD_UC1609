@@ -13,13 +13,13 @@ struct AdvancedBuffer
   uint8_t* bitmap; // pointer to buffer
   uint16_t width;  // bitmap x size
   uint16_t height; // bitmap y size
-  int16_t x; // x offset at screen
-  int16_t y; // y offset at scene or screen if not used to scene
-  uint8_t type; // resolves both pixel order and place of data ext. SRAM or onchip
-  uint32_t address; // address at external SRAM
+  int16_t x = 0; // x offset at screen
+  int16_t y = 0; // y offset at scene or screen if not used to scene
+  uint8_t type = 0; // resolves both pixel order and place of data ext. SRAM or onchip
+  uint32_t address = 0; // address at external SRAM
 }; // 14 Bytes per object (at least)
 ////////////////////////////////////////////////////////////////
-
+#define USE_ADVANCED_BUFFERING
 ////////////////////////////////////////////////////////////////
 // Display Resolution
 //
