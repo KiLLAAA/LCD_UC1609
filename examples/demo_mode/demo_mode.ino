@@ -7,7 +7,7 @@ LCD_UC1609  display(10, 9, 8); // DC, RST, CS
 
 void setup() {
   display.begin();  // initialize
-  display.clearDisplay(0x55); // this version with single param writes directly to display 0x55 makes strips
+  display.clearDisplay(0x55); // this version with single param writes directly to display, 0x55 (B01010101) makes horizontal strips
 }
 
 void loop() {
@@ -17,7 +17,7 @@ void loop() {
 
   ////////////////////////////////////////////////////////////////
   // buffer helper structures
-  
+
   AdvancedBuffer left_window;
   left_window.bitmap = (uint8_t*) &bitmapBuffer;
   left_window.width = 64;
@@ -55,7 +55,7 @@ void display_demo_mode(AdvancedBuffer* target, long iteration) {
   display.clearDisplay();
   // display.setTextSize(1); // not required until other func changes it
   display.setTextColor(WHITE);
-  display.setCursor(6, 20 + ((get_sin(( iteration ) % 255)) / 10));
+  display.setCursor(6, 20 + ((get_sin(( iteration ) % 256)) / 10));
   display.print(F("DEMO MODE"));
 
   // static values to count fps
@@ -72,7 +72,7 @@ void display_demo_mode(AdvancedBuffer* target, long iteration) {
   display.print(fps);
   display.print(F("fps"));
 
-  // flip display inversion each n frames
+  // flip display inversion every n frames
   const uint16_t flip_at = 1000; // sets the number of iteration where display inversion gets flipped
   static boolean invert_state = 1; // 1 is set to simplify code, it is flipped at frame 0 to zero
   if (iteration % flip_at == 0) {
@@ -80,13 +80,13 @@ void display_demo_mode(AdvancedBuffer* target, long iteration) {
     display.invertDisplay (invert_state);
   }
   // draws text label when display is inverted
-  if (invert_state && (iteration % 100 > 40)) { // blink on/off time 40%
+  if (invert_state && (iteration % 101 > 40)) { // blink on/off time 40%
     display.setCursor(6, 56);
     display.print(F("INVERSE!"));
   }
   // draws the loading bar representing iterations to flip the invert_state
   else if (!invert_state) {
-    display.drawFastHLine(0, 58, (64.0 / flip_at) * (iteration % flip_at), WHITE);
+    display.drawFastHLine(0, 58, (64.0 / flip_at) * (iteration % (flip_at + 1)), WHITE);
   }
   display.display();
 }
@@ -96,11 +96,11 @@ void display_demo_mode(AdvancedBuffer* target, long iteration) {
 void display_scope(AdvancedBuffer* target, long iteration) {
   display.selectedBuffer = target; // set target buffer object
   display.clearDisplay();
-  display.drawFastHLine(0, 32 + (get_sin(( iteration << 1) % 255)) / 4, 64, WHITE);
+  display.drawFastHLine(0, 32 + (get_sin(( iteration << 1) % 256)) / 4, 64, WHITE);
 
   for (uint8_t m = 0; m < 64; m++) {
-    display.drawPixel(m, 32 + (get_sin( ((iteration << 2 ) + (m << 2)) % 255)) / 10, WHITE);
-    display.drawPixel(m, 32 + (get_sin( ((iteration << 2 ) + m) % 255)) / 10, WHITE);
+    display.drawPixel(m, 32 + (get_sin( ((iteration << 2 ) + (m << 2)) % 256)) / 10, WHITE);
+    display.drawPixel(m, 32 + (get_sin( ((iteration << 2 ) + m) % 256)) / 10, WHITE);
   }
   display.display();
 }
@@ -115,7 +115,7 @@ void display_upscaled_data(AdvancedBuffer* target, long iteration) {
   // get random values
   for (uint8_t i = 0; i < array_size; i++) {
     randomArray[i] = (random(256)); // 0-255
-    //randomArray[i] = (iteration % 255); // TESTING 0-255
+    //randomArray[i] = (iteration % 256); // TESTING 0-255
   }
   for (uint8_t line = 0; line < array_size; line++) {
     uint8_t bits = randomArray[line]; // read byte

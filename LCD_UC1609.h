@@ -7,7 +7,24 @@
 #include <SPI.h>
 
 ////////////////////////////////////////////////////////////////
+// SRAM
+#define SRAM_CMD_RDMR 0x05 // read mode register
+#define SRAM_CMD_WRMR 0x01 // write mode register
+#define SRAM_CMD_READ 0x03 // read data from memory array beginning at selected address
+#define SRAM_CMD_WRITE 0x02 // write data to memory array beginning at selected address
+
+#define SRAM_BYTE_MODE 0x00 //
+#define SRAM_PAGE_MODE 0x80 //
+#define SRAM_SEQUENTIAL_MODE 0x40 //
+
+// SPISettings SRAM_settings(8000000, MSBFIRST, SPI_MODE0); // 
+////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////
 // Advanced buffer sructure
+#define TYPE_INTERNAL_V B00000000
+#define TYPE_SRAM_V B00010000
+
 struct AdvancedBuffer
 {
   uint8_t* bitmap; // pointer to buffer
@@ -15,11 +32,13 @@ struct AdvancedBuffer
   uint16_t height; // bitmap y size
   int16_t x = 0; // x offset at screen
   int16_t y = 0; // y offset at scene or screen if not used to scene
-  uint8_t type = 0; // resolves both pixel order and place of data ext. SRAM or onchip
+  uint8_t type = TYPE_INTERNAL_V; // resolves both pixel order and place of data ext. SRAM or onchip
   uint32_t address = 0; // address at external SRAM
 }; // 14 Bytes per object (at least)
 ////////////////////////////////////////////////////////////////
-#define USE_ADVANCED_BUFFERING
+//
+#define USE_ADVANCED_BUFFERING // <--------------------------------<<
+//
 ////////////////////////////////////////////////////////////////
 // Display Resolution
 //
@@ -34,11 +53,11 @@ const uint8_t LCD_WIDTH = 192, LCD_HEIGHT = 64;
 #define WHITE 1
 #define INVERSE 2
 
-// COMMANDS compatible with UC1608, UC1609, (MAYBE UC1606, UC1611 PARTIALLY)
-// READ OPERATIONS
+// COMMANDS compatible with UC1608, UC1609, (MAYBE UC1606, UC1611 LIMITED)
+// Read Operations
 #define UC1609_GET_STATUS B00000001 // TODO:(NOT TESTED) UC1608 datasheet page 10
 
-// WRITE OPERATIONS
+// Write Operations
 #define UC160X_SYS_RESET B11100010 // system reset -> 0x0e2 (5ms)
 #define UC160X_SET_POWER_CONTROL B00101111 // power control, bit 1,2: PC2, PC1 - internal charge pump, bit 0: PC0: cap load
 #define UC160X_SET_DISPLAY_ENABLE B10101110 // display enable.. 1 bit (lowest)
@@ -59,12 +78,16 @@ const uint8_t LCD_WIDTH = 192, LCD_HEIGHT = 64;
 #define UC1609_SET_COL_LSB B00000000 // + add lower 4 bits of data masked
 #define UC1609_SET_COL_MSB B00010000 // + add higher 4 bits of data shifted
 #define UC1609_SET_PAGE B10110000 // + add 3 bits -> 0-7 page
+////////////////////////////////////////////////////////////////
+#define LCD_ROTATION_NORMAL 4
+#define LCD_ROTATION_FLIP 2
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class LCD_UC1609 : public Adafruit_GFX {
   public:
-    LCD_UC1609(uint8_t _dc, uint8_t _rst, uint8_t _cs);
+    LCD_UC1609(int8_t _dc, int8_t _rst, int8_t _cs);
+    LCD_UC1609(int8_t _dc, int8_t _rst, int8_t _cs, int8_t _SRAM_cs);
     ~LCD_UC1609() {};
 
 #ifndef __AVR__
@@ -79,18 +102,17 @@ class LCD_UC1609 : public Adafruit_GFX {
     uint8_t bufferHeight;
 #endif
     void begin();
-    inline void uc1609_data (uint8_t d);
-    void uc1609_command(uint8_t command, uint8_t value);
 
     void initDisplay();
-    void displayOn(uint8_t i);
+    void displayEnable(uint8_t b);
 
     void clearDisplay(void);
     void clearDisplay(uint8_t pixels);
     void clearDisplay(uint8_t pixels, uint8_t mdelay);
 
-    void invertDisplay(uint8_t b);
-    void allPixelOn(uint8_t b);
+    void rotation(uint8_t b);
+    void invertDisplay(uint8_t b); // override from Adafruit GFX
+    void allPixelsOn(uint8_t b);
     void display(void);
     /*
         // TODO: HANDLE TEXT INTERNALLY
@@ -109,21 +131,39 @@ class LCD_UC1609 : public Adafruit_GFX {
     */
     virtual void drawPixel(int16_t x, int16_t y, uint16_t color) override;
 
-    void displayBuffer(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t* data);
-    void displayBitmap(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t* data);
+    void displayBuffer(int16_t x, int16_t y, uint16_t w, uint16_t h, uint8_t* data);
+    void displayBitmap(int16_t x, int16_t y, uint16_t w, uint16_t h, const uint8_t* data);
 
-    // TODO: FIX overrides, functions removed because horizontal line written directly LCD to memory ovewrites 8 pixels tall rect
+    // TODO: add overrides, functions removed because horizontal line written directly LCD to memory overwrites 8 pixels tall rect
     //void drawFastHLine(uint8_t x, uint8_t y, uint8_t w, uint16_t color);  //virtual void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
     //void drawFastVLine(uint8_t x, uint8_t y, uint8_t h, uint16_t color);  //virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
 
+    // SRAM
+    uint8_t SRAM_RDMR();
+    void SRAM_WRMR(uint8_t mode);
+    void SRAM_read(uint16_t addr, uint8_t* data, uint16_t n);
+    void SRAM_write(uint16_t addr, uint8_t* data, uint16_t n) ;
+    void SRAM_fill(uint16_t addr, uint8_t data, uint16_t n);
+    uint8_t SRAM_read_byte(uint16_t addr);
+    void SRAM_write_byte(uint16_t addr, uint8_t data);
+
+    void displaySRAMBuffer(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t address);
+
   private:
-    // x
-    uint8_t dc;
-    uint8_t cs;
-    uint8_t rst;
-    void select();
-    void deselect();
+    // LCD
+    int8_t dc;
+    int8_t cs;
+    int8_t rst;
+    void LCD_select();
+    void LCD_deselect();
     void hardwareReset();
+    inline void uc1609_data (uint8_t d);
+    void uc1609_command(uint8_t command, uint8_t value);
+
+    // SRAM
+    int8_t SRAM_cs;
+    void SRAM_select();
+    void SRAM_deselect();
 };
 
 #endif
