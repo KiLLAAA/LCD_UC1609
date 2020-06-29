@@ -6,8 +6,8 @@
 LCD_UC1609  display(10, 9, 8); // DC, RST, CS
 
 void setup() {
-  display.begin();  // initialize
-  display.clearDisplay(0x55); // this version with single param writes directly to display, 0x55 (B01010101) makes horizontal strips
+  display.begin(); // initialize the LCD
+  display.clearDisplay(0x55); // this version with single param writes directly to the display, 0x55 (B01010101) makes horizontal strips
 }
 
 void loop() {
@@ -45,7 +45,7 @@ void loop() {
     display_upscaled_data(&right_window, frame);
   }
 
-  frame++; // increase iteration counter
+  frame++; // increase the counter
 } // --------------------------------> LOOP END
 
 ////////////////////////////////////////////////////////////////
