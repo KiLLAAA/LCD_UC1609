@@ -87,7 +87,7 @@ void display_demo_mode(AdvancedBuffer* target, long iteration) {
   }
   // draws the loading bar representing iterations to flip the invert_state
   else if (!invert_state) {
-    display.drawFastHLine(0, 58, (64.0 / flip_at) * (iteration % (flip_at + 1)), WHITE);
+    display.drawFastHLine(0, 58, (64.0 / flip_at) * (iteration % flip_at), WHITE);
   }
   display.display();
 }

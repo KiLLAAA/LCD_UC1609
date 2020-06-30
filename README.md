@@ -66,7 +66,7 @@ All text above must be included in any redistribution.<br/>
 - [ ] support STM32F1, esp8266
 - [ ] test compatibility with more recent versions of Adafruit GFX
 - [ ] add more examples
-- [ ] add basic connection scheme
+- [x] add basic connection scheme
 - [ ] add in-depth docs
 
 ###### OTHER
