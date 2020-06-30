@@ -86,8 +86,8 @@ const uint8_t LCD_WIDTH = 192, LCD_HEIGHT = 64;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class LCD_UC1609 : public Adafruit_GFX {
   public:
-    LCD_UC1609(int8_t _dc, int8_t _rst, int8_t _cs);
     LCD_UC1609(int8_t _dc, int8_t _rst, int8_t _cs, int8_t _SRAM_cs);
+    LCD_UC1609(int8_t _dc, int8_t _rst, int8_t _cs) : LCD_UC1609(_dc, _rst, _cs, -1) {};
     ~LCD_UC1609() {};
 
 #ifndef __AVR__

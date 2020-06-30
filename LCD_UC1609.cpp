@@ -51,10 +51,6 @@ void LCD_UC1609::uc1609_command (uint8_t command, uint8_t value) {
 #endif
 }
 
-LCD_UC1609 :: LCD_UC1609(int8_t _dc, int8_t _rst, int8_t _cs) : Adafruit_GFX(LCD_WIDTH, LCD_HEIGHT) {
-  LCD_UC1609(_dc, _rst, _cs, -1);
-}
-
 LCD_UC1609 :: LCD_UC1609(int8_t _dc, int8_t _rst, int8_t _cs, int8_t _SRAM_cs) : Adafruit_GFX(LCD_WIDTH, LCD_HEIGHT) {
   // check for define and set pin numbers
 #ifdef __AVR__

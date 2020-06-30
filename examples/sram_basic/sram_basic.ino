@@ -1,5 +1,5 @@
 #include <Adafruit_GFX.h>
-#include "LCD_UC1609.h"
+#include <LCD_UC1609.h>
 
 // THIS EXAMPLE UTILIZES SRAM
 // SRAM CHIP SELECT MUST BE CONNECTED ON ANY PIN < 8 ON AVR
@@ -13,6 +13,7 @@ const uint8_t thug_life_h [] PROGMEM = {
 
 void setup() {
   display.begin(); // initialize the LCD
+  display.clearDisplay(0); // clear display memory
 }
 
 void loop() {

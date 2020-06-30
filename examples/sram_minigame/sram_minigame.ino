@@ -1,5 +1,6 @@
 #include <Adafruit_GFX.h>
-#include "LCD_UC1609.h"
+#include <LCD_UC1609.h>
+
 #include "graphics.h"
 
 // THIS EXAMPLE UTILIZES SRAM
@@ -8,6 +9,7 @@ LCD_UC1609  display(10, 9, 8, 7); // DC, RST, LCD_CS, SRAM_CS
 
 void setup() {
   display.begin(); // initialize the LCD
+  display.clearDisplay(0); // clear display memory
 }
 
 void loop() {
@@ -48,28 +50,29 @@ void loop() {
   // draw star sky
   const uint8_t STAR_COUNT = 8; // how many animated stars are drawn on screen at one time
   
+  // stars array index naming
   const uint8_t STAR_X = 0;
   const uint8_t STAR_Y = 1;
   const uint8_t STAR_UPDATE_INTERVAL = 2;
   const uint8_t STAR_CURRENT_FRAME = 3;
 
   static uint8_t stars[STAR_COUNT][4];
-  // init stars
+  // init stars at first iteration
   if (iteration == 0) {
     for (uint8_t s = 0; s < STAR_COUNT; s++) {
-      stars[s][STAR_X] = random(display.width()); // x offset
+      stars[s][STAR_X] = random(main_window.width); // x offset
       stars[s][STAR_Y] = random(24); // y offset
       stars[s][STAR_UPDATE_INTERVAL] = random(10) + 1; // interval -> how many frames to skip to advance the animation
       stars[s][STAR_CURRENT_FRAME] = random(STAR_FRAMES); // STAR_FRAMES defined at graphics.h
     }
   }
   
-  // advance animation and draw
+  // cycle trough array, advance animation and draw
   for (uint8_t s = 0; s < STAR_COUNT; s++) {
-    if (iteration % stars[s][STAR_UPDATE_INTERVAL] == 0) stars[s][STAR_CURRENT_FRAME]++;
+    if (iteration % stars[s][STAR_UPDATE_INTERVAL] == 0) stars[s][STAR_CURRENT_FRAME]++; // increase current frame
     // reinit after last frame
     if (stars[s][STAR_CURRENT_FRAME] == STAR_FRAMES) {
-      stars[s][STAR_X] = random(display.width());
+      stars[s][STAR_X] = random(main_window.width);
       stars[s][STAR_Y] = random(24);
       stars[s][STAR_UPDATE_INTERVAL] = random(10) + 1;
       stars[s][STAR_CURRENT_FRAME] = 0;

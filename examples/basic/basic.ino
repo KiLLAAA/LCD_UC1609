@@ -1,5 +1,5 @@
 #include <Adafruit_GFX.h>
-#include "LCD_UC1609.h"
+#include <LCD_UC1609.h>
 
 LCD_UC1609  display(10, 9, 8); // DC, RST, CS
 
@@ -9,6 +9,7 @@ void setup() {
 }
 
 void loop() {
+  delay(1000);
   display.clearDisplay(0); // clear display memory
   // create buffer with vertically addressed 16x16 bitmap data
   uint8_t thug_life_v [] = {
@@ -16,9 +17,10 @@ void loop() {
     0x06, 0x19, 0x23, 0x42, 0x43, 0x8A, 0x91, 0x90, 0x90, 0x91, 0x8B, 0x42, 0x43, 0x22, 0x19, 0x06,
   };
   // draw the bitmap above directly into the display memory to a random position
-  for (uint8_t m = 0; m < 64; m++) {
-    display.displayBuffer(random(192), random(64), 16, 16, (uint8_t*)thug_life_v);
+  const uint8_t bitmap_count = 64; // how many bitmaps are drawn on screen at one time
+  const uint8_t bitmap_side = 16; // side can be used for both width and height as the bitmap is a square
+  for (uint8_t m = 0; m < bitmap_count; m++) {
+    display.displayBuffer(random(192 - bitmap_side), random(64 - bitmap_side), bitmap_side, bitmap_side, (uint8_t*)thug_life_v);
     delay(100);
   }
-  delay(1000);
 } // ----------------------> LOOP END

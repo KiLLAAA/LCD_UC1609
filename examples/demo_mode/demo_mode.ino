@@ -1,5 +1,5 @@
 #include <Adafruit_GFX.h>
-#include "LCD_UC1609.h"
+#include <LCD_UC1609.h>
 
 #include "G_data.h"
 
@@ -8,6 +8,7 @@ LCD_UC1609  display(10, 9, 8); // DC, RST, CS
 void setup() {
   display.begin(); // initialize the LCD
   display.clearDisplay(0x55); // this version with single param writes directly to the display, 0x55 (B01010101) makes horizontal strips
+  delay(1000);
 }
 
 void loop() {
@@ -80,7 +81,7 @@ void display_demo_mode(AdvancedBuffer* target, long iteration) {
     display.invertDisplay (invert_state);
   }
   // draws text label when display is inverted
-  if (invert_state && (iteration % 101 > 40)) { // blink on/off time 40%
+  if (invert_state && (iteration % 100 > 39)) { // blink on/off time 40%
     display.setCursor(6, 56);
     display.print(F("INVERSE!"));
   }
