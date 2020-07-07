@@ -108,8 +108,7 @@ void LCD_UC1609::begin () {
   initDisplay();
 
   // INIT SRAM
-  SRAM_deselect(); // for intitial high to low transition
-  SRAM_WRMR(SRAM_SEQUENTIAL_MODE); // sram<-------------------------------------------------------- sram
+  initSRAM(); // check for chip select pin is done in the init, prepared for hotswap
 }
 
 void LCD_UC1609::initDisplay() {
@@ -371,6 +370,28 @@ void LCD_UC1609::displaySRAMBuffer(int16_t x, int16_t y, uint16_t w, uint16_t h,
   }
 }
 
+// SRAM init - general init for all devices
+void LCD_UC1609::initSRAM(){
+  if (SRAM_cs != -1) {
+  SRAM_deselect(); // for intitial high to low transition
+#ifdef USE_PSRAM64_INIT
+  initPSRAM();
+#endif
+  SRAM_WRMR(SRAM_SEQUENTIAL_MODE); // set sequential mode, common for all types
+  }
+}
+
+// PSRAM init - special init for PSRAM64H
+void LCD_UC1609::initPSRAM(){
+  SRAM_select();
+  SPI.transfer(SRAM_PSRAM64_RESET_ENABLE);
+  SRAM_deselect();
+  __asm__ __volatile__ ("nop; nop; nop; nop; nop; nop; nop; nop;"); // wait 8 cycles, datasheet does not specify exact length
+  SRAM_select();
+  SPI.transfer(SRAM_PSRAM64_DEVICE_RESET);
+  SRAM_deselect();
+}
+
 // SRAM chip select
 void LCD_UC1609::SRAM_select() {
   // SPI.beginTransaction(SRAM_settings); // futureproof
@@ -411,9 +432,16 @@ void LCD_UC1609::SRAM_WRMR(uint8_t mode) {
 }
 
 // SRAM read - reads data to buffer
+#ifdef USE_SRAM_24BIT_ADDRESS
+void LCD_UC1609::SRAM_read(uint32_t addr, uint8_t* data, uint16_t n) {
+  SRAM_select();
+  SPI.transfer(SRAM_CMD_READ);
+  SPI.transfer((uint8_t)(addr >> 16) & 0xFF); // A23-A16
+#else
 void LCD_UC1609::SRAM_read(uint16_t addr, uint8_t* data, uint16_t n) {
   SRAM_select();
   SPI.transfer(SRAM_CMD_READ);
+#endif
   SPI.transfer((uint8_t)(addr >> 8) & 0xFF); // A15-A08
   SPI.transfer((uint8_t)(addr) & 0xFF);       // A07-A00
   for (uint16_t i = 0; i < n; i++ ) {
@@ -423,9 +451,16 @@ void LCD_UC1609::SRAM_read(uint16_t addr, uint8_t* data, uint16_t n) {
 }
 
 // SRAM write - writes n data to address
+#ifdef USE_SRAM_24BIT_ADDRESS
+void LCD_UC1609::SRAM_write(uint32_t addr, uint8_t* data, uint16_t n) {
+  SRAM_select();
+  SPI.transfer(SRAM_CMD_WRITE);
+  SPI.transfer((uint8_t)(addr >> 16) & 0xFF); // A23-A16
+#else
 void LCD_UC1609::SRAM_write(uint16_t addr, uint8_t* data, uint16_t n) {
   SRAM_select();
   SPI.transfer(SRAM_CMD_WRITE);
+#endif
   SPI.transfer((uint8_t)(addr >> 8) & 0xFF); // A15-A08
   SPI.transfer((uint8_t)(addr) & 0xFF);       // A07-A00
   for (uint16_t i = 0; i < n; i++) {
@@ -435,9 +470,16 @@ void LCD_UC1609::SRAM_write(uint16_t addr, uint8_t* data, uint16_t n) {
 }
 
 // SRAM fill - similar to memset
+#ifdef USE_SRAM_24BIT_ADDRESS
+void LCD_UC1609::SRAM_fill(uint32_t addr, uint8_t data, uint16_t n) {
+  SRAM_select();
+  SPI.transfer(SRAM_CMD_WRITE);
+  SPI.transfer((uint8_t)(addr >> 16) & 0xFF); // A23-A16
+#else
 void LCD_UC1609::SRAM_fill(uint16_t addr, uint8_t data, uint16_t n) {
   SRAM_select();
   SPI.transfer(SRAM_CMD_WRITE);
+#endif
   SPI.transfer((uint8_t)(addr >> 8) & 0xFF); // A15-A08
   SPI.transfer((uint8_t)(addr) & 0xFF);       // A07-A00
   for (uint16_t i = 0; i < n; i++) {
@@ -447,9 +489,16 @@ void LCD_UC1609::SRAM_fill(uint16_t addr, uint8_t data, uint16_t n) {
 }
 
 // SRAM read byte - similar to PGM_read_byte - reads a byte and returns it
+#ifdef USE_SRAM_24BIT_ADDRESS
+uint8_t LCD_UC1609::SRAM_read_byte(uint32_t addr) {
+  SRAM_select();
+  SPI.transfer(SRAM_CMD_READ);
+  SPI.transfer((uint8_t)(addr >> 16) & 0xFF); // A23-A16
+#else
 uint8_t LCD_UC1609::SRAM_read_byte(uint16_t addr) {
   SRAM_select();
   SPI.transfer(SRAM_CMD_READ);
+#endif
   SPI.transfer((uint8_t)(addr >> 8) & 0xFF); // A15-A08
   SPI.transfer((uint8_t)(addr) & 0xFF);       // A07-A00
   uint8_t data;
@@ -459,9 +508,16 @@ uint8_t LCD_UC1609::SRAM_read_byte(uint16_t addr) {
 }
 
 // SRAM write - writes a byte to address
+#ifdef USE_SRAM_24BIT_ADDRESS
+void LCD_UC1609::SRAM_write_byte(uint32_t addr, uint8_t data) {
+  SRAM_select();
+  SPI.transfer(SRAM_CMD_WRITE);
+  SPI.transfer((uint8_t)(addr >> 16) & 0xFF); // A23-A16
+#else
 void LCD_UC1609::SRAM_write_byte(uint16_t addr, uint8_t data) {
   SRAM_select();
   SPI.transfer(SRAM_CMD_WRITE);
+#endif
   SPI.transfer((uint8_t)(addr >> 8) & 0xFF); // A15-A08
   SPI.transfer((uint8_t)(addr) & 0xFF);       // A07-A00
   SPI.transfer(data);

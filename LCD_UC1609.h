@@ -7,6 +7,13 @@
 #include <SPI.h>
 
 ////////////////////////////////////////////////////////////////
+// OPTIONS
+#define USE_ADVANCED_BUFFERING // <--------------------------------<<
+// #define USE_SRAM_24BIT_ADDRESS // use for memories 128kB and up, comment out for 64kB and less devices!
+// #define USE_PSRAM64_INIT // works without it -> tested, use in case of troubles
+////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////
 // SRAM
 #define SRAM_CMD_RDMR 0x05 // read mode register
 #define SRAM_CMD_WRMR 0x01 // write mode register
@@ -16,6 +23,8 @@
 #define SRAM_BYTE_MODE 0x00 //
 #define SRAM_PAGE_MODE 0x80 //
 #define SRAM_SEQUENTIAL_MODE 0x40 //
+#define SRAM_PSRAM64_RESET_ENABLE 0x66 //
+#define SRAM_PSRAM64_DEVICE_RESET 0x99 //
 
 // SPISettings SRAM_settings(8000000, MSBFIRST, SPI_MODE0); // 
 ////////////////////////////////////////////////////////////////
@@ -36,9 +45,7 @@ struct AdvancedBuffer
   uint32_t address = 0; // address at external SRAM
 }; // 14 Bytes per object (at least)
 ////////////////////////////////////////////////////////////////
-//
-#define USE_ADVANCED_BUFFERING // <--------------------------------<<
-//
+
 ////////////////////////////////////////////////////////////////
 // Display Resolution
 //
@@ -139,15 +146,24 @@ class LCD_UC1609 : public Adafruit_GFX {
     //void drawFastVLine(uint8_t x, uint8_t y, uint8_t h, uint16_t color);  //virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
 
     // SRAM
-    uint8_t SRAM_RDMR();
-    void SRAM_WRMR(uint8_t mode);
-    void SRAM_read(uint16_t addr, uint8_t* data, uint16_t n);
-    void SRAM_write(uint16_t addr, uint8_t* data, uint16_t n) ;
-    void SRAM_fill(uint16_t addr, uint8_t data, uint16_t n);
-    uint8_t SRAM_read_byte(uint16_t addr);
-    void SRAM_write_byte(uint16_t addr, uint8_t data);
-
-    void displaySRAMBuffer(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t address);
+    void initSRAM(); // general init for all devices
+    void initPSRAM(); // special init for PSRAM64H
+    uint8_t SRAM_RDMR(); // read mode register
+    void SRAM_WRMR(uint8_t mode); // write mode register
+#ifdef USE_SRAM_24BIT_ADDRESS
+    void SRAM_read(uint32_t addr, uint8_t* data, uint16_t n); // reads data to buffer
+    void SRAM_write(uint32_t addr, uint8_t* data, uint16_t n) ; // writes n data to address
+    void SRAM_fill(uint32_t addr, uint8_t data, uint16_t n); // similar to memset
+    uint8_t SRAM_read_byte(uint32_t addr);  // similar to PGM_read_byte - reads a byte and returns it
+    void SRAM_write_byte(uint32_t addr, uint8_t data); // writes a byte to address
+#else
+    void SRAM_read(uint16_t addr, uint8_t* data, uint16_t n); // reads data to buffer
+    void SRAM_write(uint16_t addr, uint8_t* data, uint16_t n) ; // writes n data to address
+    void SRAM_fill(uint16_t addr, uint8_t data, uint16_t n); // similar to memset
+    uint8_t SRAM_read_byte(uint16_t addr);  // similar to PGM_read_byte - reads a byte and returns it
+    void SRAM_write_byte(uint16_t addr, uint8_t data); // writes a byte to address
+#endif
+    void displaySRAMBuffer(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t address); // displays buffer content
 
   private:
     // LCD

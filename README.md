@@ -10,11 +10,12 @@ All text above must be included in any redistribution.<br/>
 
 ---
 
-- works with 19264-05 v3 display from AliExpress, be cautious about 3.3V and 5V versions
+- driver library for 19264-05 v3 display from AliExpress, be cautious about 3.3V and 5V versions
 - compatible with [Adafruit GFX](https://github.com/adafruit/Adafruit-GFX-Library) - sketches using other common displays like OLED SSD1306 can be easily ported
 - mirroring, inverse display and other features supported
 - can work with none, single or multiple buffers
 - buffers can be placed in external SPI SRAM!
+- supported most of the SPI SRAM chips available today
 
 ### SUPPORTED HARDWARE
 | MCU | State |
@@ -27,13 +28,14 @@ All text above must be included in any redistribution.<br/>
 
 | SRAM | Size | State |
 | --- | --- | --- |
-| 23K640 | 8k | ok |
+| 23K640 | 8k | ok* |
 | 23K256 | 32k | ok |
 | 23LC512 | 64k | ok |
-| 23LC1024 | 128k | TODO |
+| 23LC1024 | 128k | ok* |
 | IP12B256 | 32k | ok |
 | IP12B512 | 64k | ok |
-| ESP-PSRAM64H | 8192K | TODO |
+| ESP-PSRAM64H | 8192K | ok |
+ ( * - not tested yet )
 
 ### LIMITATIONS
 

@@ -1,8 +1,6 @@
 #include <Adafruit_GFX.h>
 #include <LCD_UC1609.h>
 
-#include "G_data.h"
-
 LCD_UC1609  display(10, 9, 8); // DC, RST, CS
 
 void setup() {

@@ -40,9 +40,9 @@ void loop() {
   display.setTextColor(WHITE, BLACK);
   display.setCursor(48, 0); // top, centered -> ( screen width - text width / 2 )
   long uptime = millis();
-  char secs[3]; sprintf(secs, "%02d", (uptime / 1000L) % 60);
-  char mins[3]; sprintf(mins, "%02d", (uptime / 60000L) % 60);
-  char hours[3]; sprintf(hours, "%02d", (uptime / 3600000L) % 24);
+  char secs[3]; sprintf(secs, "%02d", (uint8_t)((uptime / 1000L) % 60));
+  char mins[3]; sprintf(mins, "%02d", (uint8_t)((uptime / 60000L) % 60));
+  char hours[3]; sprintf(hours, "%02d", (uint8_t)((uptime / 3600000L) % 24));
   display.print(hours); display.print(F("."));  display.print(mins);  display.print(F(".")); display.print(secs);
 
   // display selected buffer content
