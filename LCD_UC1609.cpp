@@ -191,11 +191,12 @@ void LCD_UC1609::allPixelsOn (uint8_t i) {
 }
 
 void LCD_UC1609::drawPixel(int16_t x, int16_t y, uint16_t color) {
-  // do offscreen
-  if ((x < 0) || (x >= LCD_WIDTH) || (y < 0) || (y >= LCD_HEIGHT)) {
+#ifdef USE_ADVANCED_BUFFERING
+  // do offscreen check
+  if ((x < 0) || (x >= this->selectedBuffer->width) || (y < 0) || (y >= this->selectedBuffer->height)) {
     return;
   }
-#ifdef USE_ADVANCED_BUFFERING
+
   uint16_t tc = (this->selectedBuffer->width * (y >> 3)) + x; //
 
   switch (this->selectedBuffer->type) {
@@ -217,6 +218,11 @@ void LCD_UC1609::drawPixel(int16_t x, int16_t y, uint16_t color) {
       }
   }
 #else
+  // do offscreen check
+  if ((x < 0) || (x >= this->bufferWidth) || (y < 0) || (y >= this->bufferHeight)) {
+    return;
+  }
+
   uint16_t tc = (this->bufferWidth * (y >> 3)) + x; //
   switch (color)
   {
